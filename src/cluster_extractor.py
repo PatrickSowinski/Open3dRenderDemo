@@ -13,7 +13,7 @@ class ClusterExtractor:
     ) -> np.ndarray:
         labels = np.array(
             pointcloud.cluster_dbscan(
-                eps=max_distance_to_neighbors, min_points=min_points_around_core_point, print_progress=True
+                eps=max_distance_to_neighbors, min_points=min_points_around_core_point, print_progress=False
             )
         )
         return labels
