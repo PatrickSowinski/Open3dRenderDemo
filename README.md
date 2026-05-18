@@ -31,3 +31,15 @@ geometric structure.
 image files (linked to this Readme).
 
 ## Running the demo
+
+## Testing
+
+This repo uses pytest for unit tests.
+
+You can simply run the tests with
+
+```bash
+pytest tests/
+```
+
+It will automatically discover tests in files named `test_*.py` or `*_test.py`.
