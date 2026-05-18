@@ -1,0 +1,6 @@
+
+# pre-commit hooks (for formatting and linting)
+pre-commit >= 4.3.0
+
+# core logic
+open3d >= 0.19.0
