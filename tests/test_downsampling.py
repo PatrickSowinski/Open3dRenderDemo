@@ -16,7 +16,7 @@ def test_downsampling_default_voxel_size(eagle_pointcloud, sample_preprocessor):
         0.2,
     ],
 )
-def test_downsampling(eagle_pointcloud, sample_preprocessor, voxel_size):
+def test_downsampling_with_voxel_size(eagle_pointcloud, sample_preprocessor, voxel_size):
     # Act
     downsampled_cloud = sample_preprocessor.downsample(eagle_pointcloud, voxel_size=voxel_size)
 
