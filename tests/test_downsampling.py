@@ -1,12 +1,5 @@
 import pytest
 
-from preprocessor import Preprocessor
-
-
-@pytest.fixture(scope="session")
-def sample_preprocessor():
-    return Preprocessor()
-
 
 def test_downsampling_default_voxel_size(eagle_pointcloud, sample_preprocessor):
     # Act
