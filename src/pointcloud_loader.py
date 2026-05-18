@@ -8,4 +8,5 @@ class PointcloudLoader:
         return o3d.io.read_point_cloud(str(path))
 
     def load_eagle_example(self) -> o3d.geometry.PointCloud:
-        return o3d.data.EaglePointCloud()
+        dataset = o3d.data.EaglePointCloud()
+        return o3d.io.read_point_cloud(dataset.path)
