@@ -33,6 +33,34 @@ class Renderer:
         self.logger = logging.getLogger("Renderer")
         self.verbose = verbose
 
+    @staticmethod
+    def create_visualizer(show: bool, window_name: str) -> o3d.visualization.Visualizer:
+        vis = o3d.visualization.Visualizer()
+        vis.create_window(visible=show, window_name=window_name)
+        return vis
+
+    @staticmethod
+    def render_visualizer(
+        visualizer: o3d.visualization.Visualizer,
+        vis_params: VisualizationParams,
+        show: bool,
+        save_path: Optional[Path] = None,
+    ):
+        ctr = visualizer.get_view_control()
+        ctr.set_front(vis_params.front)
+        ctr.set_lookat(vis_params.lookat)
+        ctr.set_up(vis_params.up)
+        ctr.set_zoom(vis_params.zoom)
+        visualizer.poll_events()
+        visualizer.update_renderer()
+        # Reuse the same visualization for showing and saving to avoid redundant rendering
+        if save_path is not None:
+            visualizer.capture_screen_image(str(save_path))
+        if show:
+            # keep window open until user closes it
+            visualizer.run()
+        visualizer.destroy_window()
+
     def render_pointcloud(
         self,
         pointcloud: o3d.geometry.PointCloud,
@@ -40,25 +68,10 @@ class Renderer:
         show: bool = True,
         save_path: Optional[Path] = None,
     ):
-        # Reuse the same visualization for showing and saving to avoid redundant rendering
-        vis = o3d.visualization.Visualizer()
-        vis.create_window(visible=show)
+        vis = self.create_visualizer(show=show, window_name="Downsampled Pointcloud")
         vis.add_geometry(pointcloud)
-        ctr = vis.get_view_control()
-        ctr.set_front(vis_params.front)
-        ctr.set_lookat(vis_params.lookat)
-        ctr.set_up(vis_params.up)
-        ctr.set_zoom(vis_params.zoom)
-        vis.poll_events()
-        vis.update_renderer()
-        if save_path is not None:
-            vis.capture_screen_image(str(save_path))
-        if show:
-            # keep the window open until user closes it
-            vis.run()
-        vis.destroy_window()
+        self.render_visualizer(vis, vis_params, show, save_path)
 
-    # TODO: remove duplication for rendering
     def render_normals(
         self,
         pointcloud: o3d.geometry.PointCloud,
@@ -66,25 +79,11 @@ class Renderer:
         show: bool = True,
         save_path: Optional[Path] = None,
     ):
-        # Reuse the same visualization for showing and saving to avoid redundant rendering
-        vis = o3d.visualization.Visualizer()
-        vis.create_window(visible=show)
+        vis = self.create_visualizer(show=show, window_name="Downsampled Pointcloud with Normals")
         vis.add_geometry(pointcloud)
-        ctr = vis.get_view_control()
-        ctr.set_front(vis_params.front)
-        ctr.set_lookat(vis_params.lookat)
-        ctr.set_up(vis_params.up)
-        ctr.set_zoom(vis_params.zoom)
         render_option = vis.get_render_option()
         render_option.point_show_normal = True
-        vis.poll_events()
-        vis.update_renderer()
-        if save_path is not None:
-            vis.capture_screen_image(str(save_path))
-        if show:
-            # keep the window open until user closes it
-            vis.run()
-        vis.destroy_window()
+        self.render_visualizer(vis, vis_params, show, save_path)
 
     def render_segmentation(
         self,
@@ -106,6 +105,7 @@ class Renderer:
         colors[geometry.downsampled_cluster_labels < 0] = 0  # -1 label = noise
 
         # plot each cluster
+        all_clusters = []
         for label in np.unique(geometry.downsampled_cluster_labels):
             if label < 0:
                 continue  # skip noise
@@ -114,37 +114,15 @@ class Renderer:
             # (e.g. for coloring)
             cluster_points = geometry.downsampled_cloud.select_by_index(cluster_indices)
             cluster_points.paint_uniform_color(colors[label, :3])
-            vis = o3d.visualization.Visualizer()
-            vis.create_window(visible=show)
+            all_clusters.append(cluster_points)
+            vis = self.create_visualizer(show=show, window_name=f"Cluster {label + 1} / {max_label + 1}")
             vis.add_geometry(cluster_points)
-            ctr = vis.get_view_control()
-            ctr.set_front(vis_params.front)
-            ctr.set_lookat(vis_params.lookat)
-            ctr.set_up(vis_params.up)
-            ctr.set_zoom(vis_params.zoom)
-            vis.poll_events()
-            vis.update_renderer()
-            # if save_path is not None:
-            #     cluster_save_path = save_path.parent / f"{save_path.stem}_cluster_{label}{save_path.suffix}"
-            #     vis.capture_screen_image(str(cluster_save_path))
-            if show:
-                # keep the window open until user closes it
-                vis.run()
-            vis.destroy_window()
+            self.render_visualizer(
+                vis, vis_params, show, None
+            )  # we will save the combined plot at the end, so no need to save here
 
-        # # Reuse the same visualization for showing and saving to avoid redundant rendering
-        # vis = o3d.visualization.Visualizer()
-        # vis.create_window(visible=show)
-        # ctr = vis.get_view_control()
-        # ctr.set_front(vis_params.front)
-        # ctr.set_lookat(vis_params.lookat)
-        # ctr.set_up(vis_params.up)
-        # ctr.set_zoom(vis_params.zoom)
-        # vis.poll_events()
-        # vis.update_renderer()
-        # if save_path is not None:
-        #     vis.capture_screen_image(str(save_path))
-        # if show:
-        #     # keep the window open until user closes it
-        #     vis.run()
-        # vis.destroy_window()
+        # Plot all clusters together
+        vis = self.create_visualizer(show=show, window_name="All Clusters")
+        for cluster in all_clusters:
+            vis.add_geometry(cluster)
+        self.render_visualizer(vis, vis_params, show, save_path)
