@@ -32,6 +32,20 @@ image files (linked to this Readme).
 
 ## Running the demo
 
+You can run the example pipeline with
+
+```bash
+# default (show visualizations, no image saving)
+python src/pipeline_controller.py
+
+# show visualizations and save images
+python src/pipeline_controller.py --save_plots
+# don't show visualizations and save images
+python src/pipeline_controller.py --no_show --save_plots
+# no showing, no image saving (helpful for debugging)
+python src/pipeline_controller.py --no_show
+```
+
 ## Testing
 
 This repo uses pytest for unit tests.
