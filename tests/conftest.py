@@ -1,9 +1,14 @@
+import logging
+
 import pytest
 
 from cluster_extractor import ClusterExtractor
 from normal_estimator import NormalEstimator
 from pointcloud_loader import PointcloudLoader
 from preprocessor import Preprocessor
+
+# configure logging globally for this session
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s [%(levelname)s] %(message)s")
 
 # conftest.py is autodiscovered by pytest to load fixtures
 # we define shared fixtures here to avoid duplication across test files

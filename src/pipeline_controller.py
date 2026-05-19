@@ -9,7 +9,7 @@ from preprocessor import Preprocessor
 from renderer import Renderer, VisualizationParams
 
 # configure logging globally for this session
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s [%(levelname)s] %(message)s")
 
 
 class PipelineController:
@@ -20,17 +20,13 @@ class PipelineController:
         self.preprocessor = Preprocessor()
         self.normal_estimator = NormalEstimator()
         self.cluster_extractor = ClusterExtractor()
-        self.renderer = Renderer()
 
-        self.eagle_viz_params = VisualizationParams(
-            front=[-0.97604822713972006, -0.07040202601844868, 0.20584803382570194],
-            lookat=[0.56815877868502129, 3.2540328971914581, 1.1290062986978375],
-            up=[0.091901599279143362, -0.99105079298882548, 0.096811268797366179],
-            zoom=0.62839660644531226,
-        )
+        self.renderer = Renderer()
+        self.eagle_viz_params = VisualizationParams.eagle_front()
 
     def run_example_pipeline(self, show_plots: bool = True, save_plots: bool = False):
         self.logger.info("Running example pipeline...")
+        # init an empty GeometryReconstruction where we can link related data for a pointcloud
         geometry: GeometryReconstruction = GeometryReconstruction()
 
         save_path = None
@@ -40,15 +36,21 @@ class PipelineController:
             downsampled_path = save_path / "downsampled_cloud.png"
             if downsampled_path.exists():
                 self.logger.warning(f"Overwriting existing file: {downsampled_path}")
+            normals_path = save_path / "estimated_normals.png"
+            if normals_path.exists():
+                self.logger.warning(f"Overwriting existing file: {normals_path}")
+            clusters_path = save_path / "extracted_clusters.png"
+            if clusters_path.exists():
+                self.logger.warning(f"Overwriting existing file: {clusters_path}")
 
         self.logger.info("Loading eagle point cloud...")
         geometry.full_cloud = self.pointcloud_loader.load_eagle_example()
 
         self.logger.info("Downsampling the point cloud...")
-        geometry.downsampled_cloud = self.preprocessor.downsample(geometry.full_cloud)
+        geometry.downsampled_cloud = self.preprocessor.downsample(geometry.full_cloud, voxel_size=0.1)
         # render the downsampled cloud
         self.renderer.render_pointcloud(
-            geometry.downsampled_cloud,
+            pointcloud=geometry.downsampled_cloud,
             vis_params=self.eagle_viz_params,
             show=show_plots,
             save_path=downsampled_path if save_plots else None,
@@ -56,13 +58,27 @@ class PipelineController:
 
         self.logger.info("Estimating normals for downsampled cloud...")
         self.normal_estimator.estimate_normals(geometry.downsampled_cloud)
+        # render the estimated normals
+        self.renderer.render_normals(
+            pointcloud=geometry.downsampled_cloud,
+            vis_params=self.eagle_viz_params,
+            show=show_plots,
+            save_path=normals_path if save_plots else None,
+        )
 
         self.logger.info("Extracting clusters from downsampled cloud...")
         geometry.downsampled_cluster_labels = self.cluster_extractor.extract_clusters(geometry.downsampled_cloud)
+        # render the clusters
+        self.renderer.render_segmentation(
+            geometry=geometry,
+            vis_params=self.eagle_viz_params,
+            show=show_plots,
+            save_path=clusters_path if save_plots else None,
+        )
 
         self.logger.info("Finished running example pipeline.")
 
 
 if __name__ == "__main__":
     controller = PipelineController()
-    controller.run_example_pipeline()
+    controller.run_example_pipeline(show_plots=True, save_plots=False)
