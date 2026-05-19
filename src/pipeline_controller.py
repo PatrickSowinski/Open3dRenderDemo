@@ -1,3 +1,4 @@
+import argparse
 import logging
 from pathlib import Path
 
@@ -26,6 +27,7 @@ class PipelineController:
 
     def run_example_pipeline(self, show_plots: bool = True, save_plots: bool = False):
         self.logger.info("Running example pipeline...")
+        self.logger.info(f"show_plots={show_plots}, save_plots={save_plots}")
         # init an empty GeometryReconstruction where we can link related data for a pointcloud
         geometry: GeometryReconstruction = GeometryReconstruction()
 
@@ -79,6 +81,16 @@ class PipelineController:
         self.logger.info("Finished running example pipeline.")
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--no_show", action="store_true", help="Whether to show the visualizations interactively.")
+    parser.add_argument("--save_plots", action="store_true", help="Whether to save the visualizations as images.")
+
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
+    args = parse_args()
     controller = PipelineController()
-    controller.run_example_pipeline(show_plots=True, save_plots=False)
+    controller.run_example_pipeline(show_plots=not args.no_show, save_plots=args.save_plots)
