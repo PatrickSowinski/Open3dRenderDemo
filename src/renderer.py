@@ -39,8 +39,8 @@ class Renderer:
         vis.create_window(visible=show, window_name=window_name)
         return vis
 
-    @staticmethod
     def render_visualizer(
+        self,
         visualizer: o3d.visualization.Visualizer,
         vis_params: VisualizationParams,
         show: bool,
@@ -55,6 +55,10 @@ class Renderer:
         visualizer.update_renderer()
         # Reuse the same visualization for showing and saving to avoid redundant rendering
         if save_path is not None:
+            self.logger.info(f"Saving visualization to {save_path}...")
+            save_path.parent.mkdir(exist_ok=True, parents=True)
+            if save_path.exists():
+                self.logger.warning(f"File {save_path} already exists and will be overwritten!")
             visualizer.capture_screen_image(str(save_path))
         if show:
             # keep window open until user closes it
@@ -122,11 +126,11 @@ class Renderer:
                 show=show, window_name=f"{window_name} - Cluster {label + 1} / {max_label + 1}"
             )
             vis.add_geometry(cluster_points)
+            cluster_save_path = None
             if save_path is not None:
-                suffix = save_path.suffix
-                save_path = save_path.with_suffix("_" + str(label) + suffix)
+                cluster_save_path = save_path.with_stem(save_path.stem + "_" + str(label))
             self.render_visualizer(
-                vis, vis_params, show, None
+                vis, vis_params, show, cluster_save_path
             )  # we will save the combined plot at the end, so no need to save here
 
         # Plot all clusters together
@@ -134,6 +138,5 @@ class Renderer:
         for cluster in all_clusters:
             vis.add_geometry(cluster)
         if save_path is not None:
-            suffix = save_path.suffix
-            save_path = save_path.with_suffix("_all" + suffix)
+            save_path = save_path.with_stem(save_path.stem + "_all")
         self.render_visualizer(vis, vis_params, show, save_path)
