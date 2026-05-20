@@ -26,8 +26,6 @@ class ClusterExtractor:
             + ", ".join(f"{i}: {count}" for i, count in zip(unique_labels, label_count))
         )
 
-    # returns a list of labels for each point in the input pointcloud
-    # points with the same label belong to the same cluster
     def extract_clusters_euclidean(
         self,
         pointcloud: o3d.geometry.PointCloud,
@@ -35,6 +33,20 @@ class ClusterExtractor:
         min_points_around_core_point: int = 10,
         min_points_in_cluster: int = 150,
     ) -> np.ndarray:
+        """
+        Extract clusters using euclidean clustering (DBSCAN).
+        This works well when clusters have empty space between them.
+        Computation is rather fast.
+
+        Args:
+            pointcloud: The input pointcloud for which to extract clusters.
+            max_distance_to_neighbors: The maximum distance to consider a point a neighbor.
+            min_points_around_core_point: The minimum number of points around a cluster core point.
+            min_points_in_cluster: The minimum number of points required in a cluster.
+
+        Returns:
+            An array of cluster labels for each point in the input pointcloud.
+        """
         labels = np.array(
             pointcloud.cluster_dbscan(
                 eps=max_distance_to_neighbors, min_points=min_points_around_core_point, print_progress=False
@@ -47,12 +59,55 @@ class ClusterExtractor:
         self.log_cluster_info(labels, has_noise=True)
         return labels
 
+    def extract_clusters_k_means(
+        self,
+        pointcloud: o3d.geometry.PointCloud,
+        num_clusters: int = 6,
+    ) -> np.ndarray:
+        """
+        Extract clusters using simple k-means clustering.
+        This will determine a fixed number of clusters.
+        Clusters tend to be compact, convex regions in space.
+        It might split long surfaces into multiple clusters.
+        Computation is rather fast.
+
+        Args:
+            pointcloud: The input pointcloud for which to extract clusters.
+            num_clusters: The number of clusters to extract.
+
+        Returns:
+            An array of cluster labels for each point in the input pointcloud.
+        """
+        self.logger.info("Running k-means clustering...")
+        kmeans = KMeans(
+            n_clusters=num_clusters,
+            random_state=0,
+            n_init=10,
+        )
+        labels = kmeans.fit_predict(pointcloud.points)
+        self.log_cluster_info(labels, has_noise=False)
+        return labels
+
     def extract_clusters_region_growing(
         self,
         pointcloud: o3d.geometry.PointCloud,
         max_distance_to_neighbors: float = 0.2,
         min_points_in_cluster: int = 300,
     ) -> np.ndarray:
+        """
+        Extract clusters using region growing (normal-based).
+        This works well when clusters are mostly flat, or just slightly curved.
+        It might merge clusters that have a connection with low curvature between them.
+        Computation is rather slow.
+
+        Args:
+            pointcloud: The input pointcloud for which to extract clusters.
+            max_distance_to_neighbors: The maximum distance to consider a point a neighbor.
+            min_points_in_cluster: The minimum number of points required in a cluster.
+
+        Returns:
+            An array of cluster labels for each point in the input pointcloud.
+        """
         kdtree = o3d.geometry.KDTreeFlann(pointcloud)
         normals = np.asarray(pointcloud.normals)
         labels = -np.ones(len(pointcloud.points), dtype=np.int32)
@@ -106,28 +161,29 @@ class ClusterExtractor:
         self.log_cluster_info(labels, has_noise=True)
         return labels
 
-    def extract_clusters_k_means(
-        self,
-        pointcloud: o3d.geometry.PointCloud,
-        num_clusters: int = 6,
-    ) -> np.ndarray:
-        self.logger.info("Running k-means clustering...")
-        kmeans = KMeans(
-            n_clusters=num_clusters,
-            random_state=0,
-            n_init=10,
-        )
-        labels = kmeans.fit_predict(pointcloud.points)
-        self.log_cluster_info(labels, has_noise=False)
-        return labels
-
     def extract_clusters_spectral(
         self,
         pointcloud: o3d.geometry.PointCloud,
-        num_clusters: int = 5,
+        num_clusters: int = 6,
         num_affinity_neighbors: int = 10,
         affinity_sigma: float = 0.4,
     ) -> np.ndarray:
+        """
+        Extract clusters using spectral clustering.
+        This will determine a fixed number of clusters.
+        This computes an embedding for the points, which encodes connectivity.
+        Then, it runs k-means on that embedding.
+        Computation is rather slow.
+
+        Args:
+            pointcloud: The input pointcloud for which to extract clusters.
+            num_clusters: The number of clusters to extract.
+            num_affinity_neighbors: The number of neighbors to consider for the affinity matrix.
+            affinity_sigma: The sigma parameter for the Gaussian affinity function.
+
+        Returns:
+            An array of cluster labels for each point in the input pointcloud.
+        """
         # Construct KDTree for neighbor search
         kdtree = o3d.geometry.KDTreeFlann(pointcloud)
 
