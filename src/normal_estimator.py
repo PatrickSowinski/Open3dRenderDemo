@@ -12,7 +12,6 @@ class NormalEstimator:
         self,
         pointcloud: o3d.geometry.PointCloud,
         search_param: o3d.geometry.KDTreeSearchParam = None,
-        orient_normals_neighbors: int = 30,
     ) -> None:
         """
         Estimate normals for the input pointcloud.
@@ -33,6 +32,7 @@ class NormalEstimator:
         # Note: Below, orient normals is commented out to save computation time.
         #  It did not seem to improve the clustering significantly.
         # # Orient normals to face in a consistent direction (inward/outward)
+        # orient_normals_neighbors = 30
         # pointcloud.orient_normals_consistent_tangent_plane(orient_normals_neighbors)
 
         if self.verbose:

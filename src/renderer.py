@@ -138,6 +138,9 @@ class Renderer:
         all_clusters = []
         for label in sorted(label_color_map):
             cluster_indices = np.where(geometry.downsampled_cluster_labels == label)[0]
+            if len(cluster_indices) == 0:
+                continue
+
             # Note: select_by_index creates a copy, so we can modify it without affecting the original point cloud
             # (e.g. for coloring)
             cluster_points = geometry.downsampled_cloud.select_by_index(cluster_indices)
@@ -151,7 +154,7 @@ class Renderer:
 
             # visualize single cluster
             vis = self.create_visualizer(
-                show=show, window_name=f"{window_name} - Cluster {label + 1} / {len(label_color_map)}"
+                show=show, window_name=f"{window_name} - Cluster {label + 1} / {len(label_color_map) - 1}"
             )
             vis.add_geometry(cluster_points)
             cluster_save_path = None

@@ -11,3 +11,6 @@ indent-style = "space"
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+filterwarnings = [
+  "ignore::pyparsing.PyparsingDeprecationWarning",
+]

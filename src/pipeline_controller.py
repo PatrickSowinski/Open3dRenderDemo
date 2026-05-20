@@ -71,7 +71,7 @@ class PipelineController:
         self.renderer.render_segmentation(
             geometry=geometry,
             vis_params=self.eagle_viz_params,
-            window_name="Segmented pointcloud",
+            window_name="Segmented pointcloud (k-means)",
             show=show_plots,
             save_path=save_path / "k_means" / "extracted_clusters.png" if save_plots else None,
         )
@@ -85,7 +85,7 @@ class PipelineController:
         self.renderer.render_segmentation(
             geometry=geometry,
             vis_params=self.eagle_viz_params,
-            window_name="Segmented pointcloud",
+            window_name="Segmented pointcloud (euclidean)",
             show=show_plots,
             save_path=save_path / "euclidean" / "extracted_clusters.png" if save_plots else None,
         )
