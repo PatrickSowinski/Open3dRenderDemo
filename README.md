@@ -35,9 +35,19 @@ The estimated normals on the downsampled cloud with the current settings look li
 
 ### Perform clustering to separate the scene into individual components
 
-The segmentation (clustering) result with the current settings looks like this:
+The example runs two different clustering algorithms: euclidean and k-means.
 
-![Image of downsampled cloud](readme_images/extracted_clusters_all.png)
+Euclidean clustering mostly just results in one big cluster for the Eagle dataset, due to its continuous surfaces.
+
+K-means is able to cluster the Eagle dataset into more meaningful components, like wings or legs.
+
+Result of euclidean clustering with current settings:
+
+![Image of downsampled cloud](readme_images/euclidean/extracted_clusters_all.png)
+
+Result of k-means clustering with current settings:
+
+![Image of downsampled cloud](readme_images/k_means/extracted_clusters_all.png)
 
 ## Running the demo
 

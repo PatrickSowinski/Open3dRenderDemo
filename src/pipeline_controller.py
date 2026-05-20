@@ -63,7 +63,7 @@ class PipelineController:
         )
 
         # extract clusters
-        self.logger.info("Extracting clusters from downsampled cloud...")
+        self.logger.info("Extracting clusters from downsampled cloud using k-means...")
         geometry.downsampled_cluster_labels = self.cluster_extractor.extract_clusters_k_means(
             geometry.downsampled_cloud
         )
@@ -73,7 +73,21 @@ class PipelineController:
             vis_params=self.eagle_viz_params,
             window_name="Segmented pointcloud",
             show=show_plots,
-            save_path=save_path / "extracted_clusters.png" if save_plots else None,
+            save_path=save_path / "k_means" / "extracted_clusters.png" if save_plots else None,
+        )
+
+        # extract clusters
+        self.logger.info("Extracting clusters from downsampled cloud using euclidean clustering...")
+        geometry.downsampled_cluster_labels = self.cluster_extractor.extract_clusters_euclidean(
+            geometry.downsampled_cloud
+        )
+        # render the clusters
+        self.renderer.render_segmentation(
+            geometry=geometry,
+            vis_params=self.eagle_viz_params,
+            window_name="Segmented pointcloud",
+            show=show_plots,
+            save_path=save_path / "euclidean" / "extracted_clusters.png" if save_plots else None,
         )
 
         self.logger.info("Finished running example pipeline.")
