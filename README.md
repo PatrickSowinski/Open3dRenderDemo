@@ -33,7 +33,7 @@ The estimated normals on the downsampled cloud with the current settings look li
 
 ![Image of downsampled cloud](readme_images/estimated_normals.png)
 
-### Perform Euclidean clustering to separate the scene into individual components
+### Perform clustering to separate the scene into individual components
 
 The segmentation (clustering) result with the current settings looks like this:
 

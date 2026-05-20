@@ -64,7 +64,9 @@ class PipelineController:
 
         # extract clusters
         self.logger.info("Extracting clusters from downsampled cloud...")
-        geometry.downsampled_cluster_labels = self.cluster_extractor.extract_clusters(geometry.downsampled_cloud)
+        geometry.downsampled_cluster_labels = self.cluster_extractor.extract_clusters_k_means(
+            geometry.downsampled_cloud
+        )
         # render the clusters
         self.renderer.render_segmentation(
             geometry=geometry,

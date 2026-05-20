@@ -7,7 +7,7 @@ def test_cluster_extraction_eagle(eagle_pointcloud, sample_cluster_extractor, sa
     downsampled_eagle = sample_preprocessor.downsample(eagle_pointcloud, voxel_size=0.1)
 
     # Act
-    labels: np.ndarray = sample_cluster_extractor.extract_clusters(
+    labels: np.ndarray = sample_cluster_extractor.extract_clusters_euclidean(
         downsampled_eagle, max_distance_to_neighbors=0.15, min_points_around_core_point=10, min_points_in_cluster=150
     )
     unique_labels = np.unique(labels)

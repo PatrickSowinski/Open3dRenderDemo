@@ -9,7 +9,10 @@ class NormalEstimator:
         self.verbose = verbose
 
     def estimate_normals(
-        self, pointcloud: o3d.geometry.PointCloud, search_param: o3d.geometry.KDTreeSearchParam = None
+        self,
+        pointcloud: o3d.geometry.PointCloud,
+        search_param: o3d.geometry.KDTreeSearchParam = None,
+        orient_normals_neighbors: int = 30,
     ) -> None:
         """
         Estimate normals for the input pointcloud.
@@ -24,6 +27,13 @@ class NormalEstimator:
         """
         # Use a default search_param if none is provided
         search_param = search_param or o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30)
+        # Use Open3D's built-in normal estimation function, which modifies pointcloud.normals
         pointcloud.estimate_normals(search_param=search_param)
+
+        # Note: Below, orient normals is commented out to save computation time.
+        #  It did not seem to improve the clustering significantly.
+        # # Orient normals to face in a consistent direction (inward/outward)
+        # pointcloud.orient_normals_consistent_tangent_plane(orient_normals_neighbors)
+
         if self.verbose:
             self.logger.info(f"Estimated normals for {len(pointcloud.points)} points in pointcloud.")
