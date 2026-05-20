@@ -100,7 +100,7 @@ However, it is cleaner to just pass the params directly into the function, since
 The more reasonable uses for classes in this repo are:
 - GeometryReconstruction, which ties together different data of the same pointcloud.
 - PipelineController, which stores the pipeline configuration. Though this only really makes sense if the pipeline is reused somehow.
-- VisualizationParams, simple dataclass to pass around Open3D visualizer view params. Potentially useful for testing disconnected parts of the pipeline and renderer.
+- VisualizationParams, simple dataclass to pass around Open3D visualizer view params. Potentially useful for testing individual parts of the pipeline and renderer.
 - Renderer, barely has any state now, but a more advanced rendering setup would probably have more state that optimizes/configures how it runs on a certain hardware (maybe even caches).
 
 ### Inheritance and polymorphism
