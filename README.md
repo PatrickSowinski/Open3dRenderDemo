@@ -112,7 +112,7 @@ We could create a `PipelineStep` (abstract) parent class (or interface) for Prep
 But the only thing they would share right now is the logger. And even for that we still need to pass a different `name` argument, since it's very useful that each log identifies which class it comes from using the name (which is actually the reason why the logger was put into the constructors).
 So this inheritance would not really clean up our constructors significantly.
 
-The different pipeline functions (like `estimate_normals()`) have different function signatures anyways, so it makes little sense to force them into polymorphism.
+The different pipeline functions (like `estimate_normals_euclidean()`) have different function signatures anyways, so it makes little sense to force them into polymorphism.
 We actually want to keep them decoupled, so it's easier to adapt them to what's needed for pipeline steps.
 
 The more logical use for inheritance would be if we want to provide alternatives for the same pipeline step.
@@ -123,3 +123,11 @@ However, even that approach for 1 class per alternative algorithm seems like unn
 We can simply just add a new function inside the existing class for the alternative algorithm.
 That seems to be the more common approach for open-source libraries (incl. Open3D), where one class can have multiple alternative functions to achieve the same goal (e.g. different downsampling functions).
 It's easier for a developer to read the docs for a single class and directly compare alternative functions, than to read multiple class docs and figure out their inheritance structure.
+
+## UML diagram
+
+The following simple UML diagram was used during the design and implementation of this demo:
+
+![UML diagram](EagleProcessing.png)
+
+(Note: The diagram does not show all details of the final implementation.)
