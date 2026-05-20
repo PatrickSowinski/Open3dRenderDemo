@@ -65,10 +65,11 @@ class Renderer:
         self,
         pointcloud: o3d.geometry.PointCloud,
         vis_params: VisualizationParams,
+        window_name: str = "",
         show: bool = True,
         save_path: Optional[Path] = None,
     ):
-        vis = self.create_visualizer(show=show, window_name="Downsampled Pointcloud")
+        vis = self.create_visualizer(show=show, window_name=window_name)
         vis.add_geometry(pointcloud)
         self.render_visualizer(vis, vis_params, show, save_path)
 
@@ -76,10 +77,11 @@ class Renderer:
         self,
         pointcloud: o3d.geometry.PointCloud,
         vis_params: VisualizationParams,
+        window_name: str = "",
         show: bool = True,
         save_path: Optional[Path] = None,
     ):
-        vis = self.create_visualizer(show=show, window_name="Downsampled Pointcloud with Normals")
+        vis = self.create_visualizer(show=show, window_name=window_name)
         vis.add_geometry(pointcloud)
         render_option = vis.get_render_option()
         render_option.point_show_normal = True
@@ -89,6 +91,7 @@ class Renderer:
         self,
         geometry: GeometryReconstruction,
         vis_params: VisualizationParams,
+        window_name: str = "",
         show: bool = True,
         save_path: Optional[Path] = None,
     ):
@@ -115,14 +118,22 @@ class Renderer:
             cluster_points = geometry.downsampled_cloud.select_by_index(cluster_indices)
             cluster_points.paint_uniform_color(colors[label, :3])
             all_clusters.append(cluster_points)
-            vis = self.create_visualizer(show=show, window_name=f"Cluster {label + 1} / {max_label + 1}")
+            vis = self.create_visualizer(
+                show=show, window_name=f"{window_name} - Cluster {label + 1} / {max_label + 1}"
+            )
             vis.add_geometry(cluster_points)
+            if save_path is not None:
+                suffix = save_path.suffix
+                save_path = save_path.with_suffix("_" + str(label) + suffix)
             self.render_visualizer(
                 vis, vis_params, show, None
             )  # we will save the combined plot at the end, so no need to save here
 
         # Plot all clusters together
-        vis = self.create_visualizer(show=show, window_name="All Clusters")
+        vis = self.create_visualizer(show=show, window_name=f"{window_name} - All Clusters")
         for cluster in all_clusters:
             vis.add_geometry(cluster)
+        if save_path is not None:
+            suffix = save_path.suffix
+            save_path = save_path.with_suffix("_all" + suffix)
         self.render_visualizer(vis, vis_params, show, save_path)
