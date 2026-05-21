@@ -1,0 +1,11 @@
+
+# pre-commit hooks (for formatting and linting)
+pre-commit >= 4.3.0
+
+# testing
+pytest >= 8.4.2
+
+# core logic
+open3d >= 0.19.0
+scikit-learn >= 1.6.1
+scipy >= 1.13.1
