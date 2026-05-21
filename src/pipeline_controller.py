@@ -23,6 +23,7 @@ class PipelineController:
         self.cluster_extractor = ClusterExtractor()
 
         self.renderer = Renderer()
+        # We just re-use the same eagle_front view for all images for now
         self.eagle_viz_params = VisualizationParams.eagle_front()
 
     def run_example_pipeline(

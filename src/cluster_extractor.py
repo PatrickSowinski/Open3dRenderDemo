@@ -13,6 +13,7 @@ class ClusterExtractor:
         self.logger = logging.getLogger("ClusterExtractor")
         self.verbose = verbose
 
+    # helper function to log number of labels and points per label
     def log_cluster_info(self, labels: np.ndarray, has_noise: bool) -> None:
         if not self.verbose:
             return
@@ -63,6 +64,7 @@ class ClusterExtractor:
         self,
         pointcloud: o3d.geometry.PointCloud,
         num_clusters: int = 6,
+        n_init_k_means: int = 10,
     ) -> np.ndarray:
         """
         Extract clusters using simple k-means clustering.
@@ -74,15 +76,15 @@ class ClusterExtractor:
         Args:
             pointcloud: The input pointcloud for which to extract clusters.
             num_clusters: The number of clusters to extract.
+            n_init_k_means: Number of times to run k-means with different initializations.
 
         Returns:
             An array of cluster labels for each point in the input pointcloud.
         """
-        self.logger.info("Running k-means clustering...")
         kmeans = KMeans(
             n_clusters=num_clusters,
             random_state=0,
-            n_init=10,
+            n_init=n_init_k_means,
         )
         labels = kmeans.fit_predict(pointcloud.points)
         self.log_cluster_info(labels, has_noise=False)
@@ -92,6 +94,7 @@ class ClusterExtractor:
         self,
         pointcloud: o3d.geometry.PointCloud,
         max_distance_to_neighbors: float = 0.2,
+        max_angle_between_normals: float = 10.0,
         min_points_in_cluster: int = 300,
     ) -> np.ndarray:
         """
@@ -103,18 +106,24 @@ class ClusterExtractor:
         Args:
             pointcloud: The input pointcloud for which to extract clusters.
             max_distance_to_neighbors: The maximum distance to consider a point a neighbor.
+            max_angle_between_normals: The maximum angle between normals to consider a point a neighbor.
+                (in degrees)
             min_points_in_cluster: The minimum number of points required in a cluster.
 
         Returns:
             An array of cluster labels for each point in the input pointcloud.
         """
+        # Note: This implementation is also slow, because it loops through the data in Python.
+        # An implementation in C++ could be much faster.
+
+        # Construct KDTree for neighbor search
         kdtree = o3d.geometry.KDTreeFlann(pointcloud)
         normals = np.asarray(pointcloud.normals)
         labels = -np.ones(len(pointcloud.points), dtype=np.int32)
         current_cluster = 0
 
         # cosine threshold for angle between normals
-        cos_threshold = np.cos(np.deg2rad(10))
+        cos_threshold = np.cos(np.deg2rad(max_angle_between_normals))
 
         for seed_idx in range(len(pointcloud.points)):
             # already assigned
@@ -184,6 +193,9 @@ class ClusterExtractor:
         Returns:
             An array of cluster labels for each point in the input pointcloud.
         """
+        # Note: This implementation is also slow, because it loops through the data in Python.
+        # An implementation in C++ could be much faster.
+
         # Construct KDTree for neighbor search
         kdtree = o3d.geometry.KDTreeFlann(pointcloud)
 

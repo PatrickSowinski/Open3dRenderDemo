@@ -12,6 +12,7 @@ from geometry_reconstruction import GeometryReconstruction
 
 @dataclass
 class VisualizationParams:
+    # These params are compatible with o3d.visualization.Visualizer.get_view_control()
     front: List[float]
     lookat: List[float]
     up: List[float]
@@ -80,7 +81,7 @@ class Renderer:
     ):
         vis = self.create_visualizer(show=show, window_name=window_name)
         vis.add_geometry(pointcloud)
-        self.render_visualizer(vis, vis_params, show, save_path)
+        self.render_visualizer(visualizer=vis, vis_params=vis_params, show=show, save_path=save_path)
 
     def render_normals(
         self,
@@ -95,7 +96,7 @@ class Renderer:
         # activate normal showing in visualization
         render_option = vis.get_render_option()
         render_option.point_show_normal = True
-        self.render_visualizer(vis, vis_params, show, save_path)
+        self.render_visualizer(visualizer=vis, vis_params=vis_params, show=show, save_path=save_path)
 
     @staticmethod
     def create_cluster_color_map(cluster_labels: np.ndarray) -> dict[int, np.ndarray]:
@@ -160,7 +161,7 @@ class Renderer:
             cluster_save_path = None
             if save_path is not None:
                 cluster_save_path = save_path.with_stem(save_path.stem + "_" + str(label))
-            self.render_visualizer(vis, vis_params, show, cluster_save_path)
+            self.render_visualizer(visualizer=vis, vis_params=vis_params, show=show, save_path=cluster_save_path)
 
         # Plot all clusters together (incl. noise)
         vis = self.create_visualizer(show=show, window_name=f"{window_name} - All Clusters")
@@ -168,4 +169,4 @@ class Renderer:
             vis.add_geometry(cluster)
         if save_path is not None:
             save_path = save_path.with_stem(save_path.stem + "_all")
-        self.render_visualizer(vis, vis_params, show, save_path)
+        self.render_visualizer(visualizer=vis, vis_params=vis_params, show=show, save_path=save_path)

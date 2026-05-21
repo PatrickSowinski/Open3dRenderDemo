@@ -5,7 +5,7 @@ An example of processing the Eagle demo data from Open3d and rendering it.
 
 Create and activate a Python virtual environment, then install Open3D:
 
-(Note: This uses venv and pip, but feel free to use any env and package manager that you prefer.)
+(Note: This uses venv and pip, but feel free to use another env or package manager (uv/poetry) that you prefer.)
 
 ```bash
 python3 -m venv .venv
